@@ -1265,24 +1265,7 @@ export class OnUpdatePhaseCommand extends Command<GameRoom, any> {
         if (stageIndex != -1) {
           this.room.simulationManager.createPveSimulation(player, stageIndex)
         } else {
-          const opponentId = this.room.computeRandomOpponent(key)
-          if (opponentId) {
-            const opponent = this.state.players.get(opponentId)
-            if (opponent) {
-              const weather = player.simulation.getWeather(
-                player.board,
-                opponent.board
-              )
-              player.simulation.initialize(
-                player.board,
-                opponent.board,
-                player,
-                opponent,
-                this.state.stageLevel,
-                weather
-              )
-            }
-          }
+          this.room.simulationManager.computePairings()
         }
       }
     })
