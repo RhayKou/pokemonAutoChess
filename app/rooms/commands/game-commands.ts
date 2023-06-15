@@ -42,6 +42,7 @@ import { Ability } from "../../types/enum/Ability"
 import { chance, pickRandomIn } from "../../utils/random"
 import { logger } from "../../utils/logger"
 import { Passive } from "../../types/enum/Passive"
+import Simulation from "../../core/simulation"
 
 export class OnShopCommand extends Command<
   GameRoom,
@@ -738,7 +739,7 @@ export class OnJoinCommand extends Command<
             user.pokemonCollection,
             user.title,
             user.role,
-            this.room
+            this.room.simulationManager
           )
 
           this.state.players.set(client.auth.uid, player)
@@ -787,18 +788,7 @@ export class OnUpdateCommand extends Command<
       if (this.state.time < 0) {
         updatePhaseNeeded = true
       } else if (this.state.phase == GamePhaseState.FIGHT) {
-        let everySimulationFinished = true
-
-        this.state.players.forEach((player, key) => {
-          if (!player.simulation.finished) {
-            if (everySimulationFinished) {
-              everySimulationFinished = false
-            }
-            player.simulation.update(deltaTime)
-          }
-        })
-
-        if (everySimulationFinished) {
+        if (this.room.simulationManager.update(deltaTime)) {
           updatePhaseNeeded = true
         }
       } else if (this.state.phase === GamePhaseState.MINIGAME) {
@@ -837,118 +827,6 @@ export class OnUpdatePhaseCommand extends Command<GameRoom, any> {
     }
   }
 
-  computeAchievements() {
-    this.state.players.forEach((player, key) => {
-      this.checkSuccess(player)
-    })
-  }
-
-  checkSuccess(player: Player) {
-    player.titles.add(Title.NOVICE)
-    player.simulation.blueEffects.forEach((effect) => {
-      switch (effect) {
-        case Effect.PURE_POWER:
-          player.titles.add(Title.POKEFAN)
-          break
-        case Effect.SPORE:
-          player.titles.add(Title.POKEMON_RANGER)
-          break
-        case Effect.DESOLATE_LAND:
-          player.titles.add(Title.KINDLER)
-          break
-        case Effect.PRIMORDIAL_SEA:
-          player.titles.add(Title.FIREFIGHTER)
-          break
-        case Effect.OVERDRIVE:
-          player.titles.add(Title.ELECTRICIAN)
-          break
-        case Effect.JUSTIFIED:
-          player.titles.add(Title.BLACK_BELT)
-          break
-        case Effect.EERIE_SPELL:
-          player.titles.add(Title.TELEKINESIST)
-          break
-        case Effect.BEAT_UP:
-          player.titles.add(Title.DELINQUENT)
-          break
-        case Effect.STEEL_SURGE:
-          player.titles.add(Title.ENGINEER)
-          break
-        case Effect.SANDSTORM:
-          player.titles.add(Title.GEOLOGIST)
-          break
-        case Effect.TOXIC:
-          player.titles.add(Title.TEAM_ROCKET_GRUNT)
-          break
-        case Effect.DRAGON_DANCE:
-          player.titles.add(Title.DRAGON_TAMER)
-          break
-        case Effect.ANGER_POINT:
-          player.titles.add(Title.CAMPER)
-          break
-        case Effect.POWER_TRIP:
-          player.titles.add(Title.MYTH_TRAINER)
-          break
-        case Effect.CALM_MIND:
-          player.titles.add(Title.RIVAL)
-          break
-        case Effect.WATER_VEIL:
-          player.titles.add(Title.DIVER)
-          break
-        case Effect.HEART_OF_THE_SWARM:
-          player.titles.add(Title.BUG_MANIAC)
-          break
-        case Effect.MAX_GUARD:
-          player.titles.add(Title.BIRD_KEEPER)
-          break
-        case Effect.SUN_FLOWER:
-          player.titles.add(Title.GARDENER)
-          break
-        case Effect.GOOGLE_SPECS:
-          player.titles.add(Title.ALCHEMIST)
-          break
-        case Effect.DIAMOND_STORM:
-          player.titles.add(Title.HIKER)
-          break
-        case Effect.CURSE:
-          player.titles.add(Title.HEX_MANIAC)
-          break
-        case Effect.STRANGE_STEAM:
-          player.titles.add(Title.CUTE_MANIAC)
-          break
-        case Effect.SHEER_COLD:
-          player.titles.add(Title.SKIER)
-          break
-        case Effect.FORGOTTEN_POWER:
-          player.titles.add(Title.MUSEUM_DIRECTOR)
-          break
-        case Effect.PRESTO:
-          player.titles.add(Title.MUSICIAN)
-          break
-        case Effect.BREEDER:
-          player.titles.add(Title.BABYSITTER)
-          break
-        default:
-          break
-      }
-    })
-    if (player.simulation.blueEffects.length >= 5) {
-      player.titles.add(Title.HARLEQUIN)
-    }
-    let shield = 0
-    let heal = 0
-    player.simulation.blueHealDpsMeter.forEach((v) => {
-      shield += v.shield
-      heal += v.heal
-    })
-    if (shield > 1000) {
-      player.titles.add(Title.GARDIAN)
-    }
-    if (heal > 1000) {
-      player.titles.add(Title.NURSE)
-    }
-  }
-
   checkEndGame() {
     const commands = []
     const numberOfPlayersAlive = this.room.getNumberOfPlayersAlive(
@@ -968,21 +846,6 @@ export class OnUpdatePhaseCommand extends Command<GameRoom, any> {
       }, 30 * 1000)
     }
     return commands
-  }
-
-  computePlayerDamage(
-    opponentTeam: MapSchema<IPokemonEntity>,
-    stageLevel: number
-  ) {
-    let damage = Math.ceil(stageLevel / 2)
-    if (opponentTeam.size > 0) {
-      opponentTeam.forEach((pokemon) => {
-        if (!pokemon.isClone) {
-          damage += pokemon.stars
-        }
-      })
-    }
-    return damage
   }
 
   rankPlayers() {
@@ -1030,8 +893,9 @@ export class OnUpdatePhaseCommand extends Command<GameRoom, any> {
           currentResult == BattleResult.DEFEAT ||
           currentResult == BattleResult.DRAW
         ) {
-          const playerDamage = this.computePlayerDamage(
-            player.simulation.redTeam,
+          const playerDamage = this.room.simulationManager.computePlayerDamage(
+            player.id,
+            player.simulationId,
             this.state.stageLevel
           )
           player.life -= playerDamage
@@ -1047,7 +911,7 @@ export class OnUpdatePhaseCommand extends Command<GameRoom, any> {
           currentResult,
           player.opponentAvatar,
           isPVE,
-          player.simulation.weather
+          this.room.simulationManager.getWeather(player)
         )
       }
     })
@@ -1269,15 +1133,15 @@ export class OnUpdatePhaseCommand extends Command<GameRoom, any> {
   stopFightingPhase() {
     const isPVE = this.checkForPVE()
 
-    this.computeAchievements()
+    this.room.simulationManager.computeAchievements()
     this.computeStreak()
     this.computeLife()
     this.rankPlayers()
     this.checkDeath()
     this.computeIncome()
+    this.room.simulationManager.stop()
 
     this.state.players.forEach((player: Player, key: string) => {
-      player.simulation.stop()
       if (player.alive) {
         if (player.isBot) {
           player.experienceManager.level = Math.min(
@@ -1394,26 +1258,12 @@ export class OnUpdatePhaseCommand extends Command<GameRoom, any> {
 
     const stageIndex = this.getPVEIndex(this.state.stageLevel)
     this.state.shinyEncounter = this.state.stageLevel === 9 && chance(1 / 20)
+    this.state.simulations.clear()
 
     this.state.players.forEach((player: Player, key: string) => {
       if (player.alive) {
         if (stageIndex != -1) {
-          player.opponentName = NeutralStage[stageIndex].name
-          player.opponentAvatar = NeutralStage[stageIndex].avatar
-          player.opponentTitle = "Wild"
-          const pveBoard = PokemonFactory.getNeutralPokemonsByLevelStage(
-            this.state.stageLevel,
-            this.state.shinyEncounter
-          )
-          const weather = player.simulation.getWeather(player.board, pveBoard)
-          player.simulation.initialize(
-            player.board,
-            pveBoard,
-            player,
-            null,
-            this.state.stageLevel,
-            weather
-          )
+          this.room.simulationManager.createPveSimulation(player, stageIndex)
         } else {
           const opponentId = this.room.computeRandomOpponent(key)
           if (opponentId) {

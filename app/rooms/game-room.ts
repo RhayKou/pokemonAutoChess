@@ -1,6 +1,6 @@
 import { Client, Room } from "colyseus"
 import { Dispatcher } from "@colyseus/command"
-import GameState from "./states/game-state"
+import { GameState } from "./states/game-state"
 import Player from "../models/colyseus-models/player"
 import { MapSchema } from "@colyseus/schema"
 import UserMetadata, {
@@ -57,6 +57,7 @@ import { MiniGame } from "../core/matter/mini-game"
 import { logger } from "../utils/logger"
 import { computeElo } from "../core/elo"
 import { Passive } from "../types/enum/Passive"
+import { SimulationManager } from "../core/simulation-manager"
 
 export default class GameRoom extends Room<GameState> {
   dispatcher: Dispatcher<this>
@@ -64,6 +65,7 @@ export default class GameRoom extends Room<GameState> {
   additionalPokemonsPool1: Array<Pkm>
   additionalPokemonsPool2: Array<Pkm>
   miniGame: MiniGame
+  simulationManager: SimulationManager
   constructor() {
     super()
     this.dispatcher = new Dispatcher(this)
@@ -71,6 +73,7 @@ export default class GameRoom extends Room<GameState> {
     this.additionalPokemonsPool1 = new Array<Pkm>()
     this.additionalPokemonsPool2 = new Array<Pkm>()
     this.miniGame = new MiniGame()
+    this.simulationManager = new SimulationManager(this.state, this)
   }
 
   // When room is initialized
@@ -126,7 +129,7 @@ export default class GameRoom extends Room<GameState> {
           new Map<string, IPokemonConfig>(),
           "",
           Role.BOT,
-          this
+          this.simulationManager
         )
         this.state.players.set(user.id, player)
         this.state.botManager.addBot(player)
@@ -821,14 +824,25 @@ export default class GameRoom extends Room<GameState> {
           const lastWeather = player.getLastBattle()?.weather ?? Weather.NEUTRAL
           let existingSecondTier: Pkm | null = null
           player.board.forEach((pkm) => {
-            if(pkm.name === Pkm.CASCOON) existingSecondTier = Pkm.CASCOON
-            else if(pkm.name === Pkm.SILCOON) existingSecondTier = Pkm.SILCOON
+            if (pkm.name === Pkm.CASCOON) existingSecondTier = Pkm.CASCOON
+            else if (pkm.name === Pkm.SILCOON) existingSecondTier = Pkm.SILCOON
           })
-          if(existingSecondTier !== null){ 
+          if (existingSecondTier !== null) {
             pokemonEvolutionName = existingSecondTier
-          } else if([Weather.NIGHT, Weather.STORM, Weather.SANDSTORM, Weather.SNOW].includes(lastWeather)){
+          } else if (
+            [
+              Weather.NIGHT,
+              Weather.STORM,
+              Weather.SANDSTORM,
+              Weather.SNOW
+            ].includes(lastWeather)
+          ) {
             pokemonEvolutionName = Pkm.CASCOON
-          } else if([Weather.SUN, Weather.RAIN, Weather.MISTY, Weather.WINDY].includes(lastWeather)){
+          } else if (
+            [Weather.SUN, Weather.RAIN, Weather.MISTY, Weather.WINDY].includes(
+              lastWeather
+            )
+          ) {
             pokemonEvolutionName = Pkm.SILCOON
           } else {
             pokemonEvolutionName = coinflip() ? Pkm.CASCOON : Pkm.SILCOON

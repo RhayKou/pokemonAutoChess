@@ -1,7 +1,7 @@
 import { Client, Room } from "colyseus.js"
 import firebase from "firebase/compat/app"
 import React, { useEffect, useRef, useState } from "react"
-import GameState from "../../../rooms/states/game-state"
+import { GameState } from "../../../rooms/states/game-state"
 import { useAppDispatch, useAppSelector } from "../hooks"
 import {
   setPokemonCollection,

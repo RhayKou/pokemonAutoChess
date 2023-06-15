@@ -1,10 +1,16 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { Room, Client } from "colyseus.js"
 import { User } from "@firebase/auth-types"
-import { Emotion, ICustomLobbyState, Role, Title, Transfer } from "../../../types"
+import {
+  Emotion,
+  ICustomLobbyState,
+  Role,
+  Title,
+  Transfer
+} from "../../../types"
 import { IBot } from "../../../models/mongo-models/bot-v2"
 import PreparationState from "../../../rooms/states/preparation-state"
-import GameState from "../../../rooms/states/game-state"
+import { GameState } from "../../../rooms/states/game-state"
 import AfterGameState from "../../../rooms/states/after-game-state"
 import { BotDifficulty } from "../../../types/enum/Game"
 import { Pkm } from "../../../types/enum/Pokemon"
@@ -222,10 +228,16 @@ export const networkSlice = createSlice({
       state.lobby?.send(Transfer.GIVE_BOOSTER, action.payload)
     },
     setModerator: (state, action: PayloadAction<string>) => {
-      state.lobby?.send(Transfer.SET_ROLE, { role: Role.MODERATOR, uid: action.payload })
+      state.lobby?.send(Transfer.SET_ROLE, {
+        role: Role.MODERATOR,
+        uid: action.payload
+      })
     },
     setBotManager: (state, action: PayloadAction<string>) => {
-      state.lobby?.send(Transfer.SET_ROLE, { role: Role.BOT_MANAGER, uid: action.payload })
+      state.lobby?.send(Transfer.SET_ROLE, {
+        role: Role.BOT_MANAGER,
+        uid: action.payload
+      })
     },
     giveTitle: (
       state,

@@ -23,7 +23,7 @@ import {
   setNoELO,
   setUser
 } from "../stores/PreparationStore"
-import GameState from "../../../rooms/states/game-state"
+import { GameState } from "../../../rooms/states/game-state"
 import { NonFunctionPropNames, Transfer } from "../../../types"
 import "./preparation.css"
 import { playSound, SOUNDS } from "./utils/audio"

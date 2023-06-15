@@ -35,6 +35,7 @@ import { getPath } from "../public/src/pages/utils/utils"
 import GameRoom from "../rooms/game-room"
 import { pickRandomIn, randomBetween } from "../utils/random"
 import { Passive } from "../types/enum/Passive"
+import { nanoid } from "nanoid"
 
 export default class Simulation extends Schema implements ISimulation {
   @type("string") weather: Weather = Weather.NEUTRAL
@@ -44,6 +45,7 @@ export default class Simulation extends Schema implements ISimulation {
   @type({ map: Dps }) redDpsMeter = new MapSchema<Dps>()
   @type({ map: DpsHeal }) blueHealDpsMeter = new MapSchema<DpsHeal>()
   @type({ map: DpsHeal }) redHealDpsMeter = new MapSchema<DpsHeal>()
+  @type("string") id: string
   room: GameRoom
   blueEffects = new Array<Effect>()
   redEffects = new Array<Effect>()
@@ -51,25 +53,26 @@ export default class Simulation extends Schema implements ISimulation {
   finished = false
   flowerSpawn: boolean[] = [false, false]
   stageLevel = 0
-  player: IPlayer | undefined
-  id: string
+  bluePlayer: IPlayer | undefined
+  redPlayer: IPlayer | undefined
   stormLightningTimer = 0
 
-  constructor(id: string, room: GameRoom) {
+  constructor(room: GameRoom) {
     super()
-    this.id = id
+    this.id = nanoid()
     this.room = room
   }
 
   initialize(
     blueTeam: MapSchema<Pokemon>,
     redTeam: MapSchema<Pokemon>,
-    player: IPlayer,
-    opponent: IPlayer | null, // null if PVE round
+    bluePlayer: IPlayer,
+    redPlayer: IPlayer | null, // null if PVE round
     stageLevel: number,
     weather: Weather
   ) {
-    this.player = player
+    this.bluePlayer = bluePlayer
+    this.redPlayer = redPlayer ? redPlayer : undefined
     this.stageLevel = stageLevel
     this.weather = weather
 
@@ -90,15 +93,15 @@ export default class Simulation extends Schema implements ISimulation {
     })
 
     this.board = new Board(6, 8)
-    this.blueEffects = player?.effects?.list ?? []
-    this.redEffects = opponent?.effects?.list ?? []
+    this.blueEffects = bluePlayer?.effects?.list ?? []
+    this.redEffects = redPlayer?.effects?.list ?? []
     // logger.debug({ blueEffects, redEffects })
 
     this.room.updateCastform(this.weather)
 
     // update effects after castform transformation
-    this.blueEffects = player?.effects?.list ?? []
-    this.redEffects = opponent?.effects?.list ?? []
+    this.blueEffects = bluePlayer?.effects?.list ?? []
+    this.redEffects = redPlayer?.effects?.list ?? []
 
     this.finished = false
     this.flowerSpawn = [false, false]
@@ -126,15 +129,17 @@ export default class Simulation extends Schema implements ISimulation {
     }
 
     ;[
-      { team: blueTeam, effects: this.blueEffects },
-      { team: redTeam, effects: this.redEffects }
+      { team: blueTeam, effects: this.blueEffects, player: this.bluePlayer },
+      { team: redTeam, effects: this.redEffects, player: this.redPlayer }
     ].forEach(
       ({
         team,
-        effects
+        effects,
+        player
       }: {
-        team: MapSchema<Pokemon, string>
+        team: MapSchema<Pokemon>
         effects: Effect[]
+        player: IPlayer | undefined
       }) => {
         if (
           [Effect.INFESTATION, Effect.HORDE, Effect.HEART_OF_THE_SWARM].some(
@@ -164,7 +169,7 @@ export default class Simulation extends Schema implements ISimulation {
           for (let i = 0; i < numberToSpawn; i++) {
             const bug = PokemonFactory.createPokemonFromName(
               bugTeam[i].name,
-              player.pokemonCollection.get(bugTeam[i].index)
+              player?.pokemonCollection.get(bugTeam[i].index)
             )
             const coord = this.getClosestAvailablePlaceOnBoard(
               bugTeam[i],
@@ -1033,7 +1038,7 @@ export default class Simulation extends Schema implements ISimulation {
     })
   }
 
-  getWeather(
+  static getWeather(
     playerBoard: MapSchema<Pokemon, string>,
     opponentBoard: MapSchema<Pokemon, string>
   ): Weather {
@@ -1140,18 +1145,20 @@ export default class Simulation extends Schema implements ISimulation {
             false
           )
         }
-        if (this.player) {
-          const client = this.room.clients.find(
-            (cli) => cli.auth.uid === this.player!.id
-          )
-          if (client) {
-            client.send(Transfer.BOARD_EVENT, {
-              type: BoardEvent.LIGHTNING,
-              x,
-              y
-            })
+        ;[this.bluePlayer, this.redPlayer].forEach((player) => {
+          if (player) {
+            const client = this.room.clients.find(
+              (cli) => cli.auth.uid === player.id
+            )
+            if (client) {
+              client.send(Transfer.BOARD_EVENT, {
+                type: BoardEvent.LIGHTNING,
+                x,
+                y
+              })
+            }
           }
-        }
+        })
       }
     }
   }

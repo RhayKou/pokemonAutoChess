@@ -10,7 +10,7 @@ import { ItemRecipe } from "../../../../types/Config"
 import firebase from "firebase/compat/app"
 import { transformCoordinate } from "../../pages/utils/utils"
 import { Room } from "colyseus.js"
-import GameState from "../../../../rooms/states/game-state"
+import { GameState } from "../../../../rooms/states/game-state"
 import ItemContainer from "../components/item-container"
 import { GamePhaseState } from "../../../../types/enum/Game"
 import { Pkm } from "../../../../types/enum/Pokemon"
@@ -236,9 +236,14 @@ export default class GameScene extends Scene {
 
   resetDragState() {
     if (this.pokemonDragged) {
-      this.input.emit("dragend", this.input.pointer1, this.pokemonDragged, false)
+      this.input.emit(
+        "dragend",
+        this.input.pointer1,
+        this.pokemonDragged,
+        false
+      )
       this.pokemonDragged = null
-    } else if(this.itemDragged) {
+    } else if (this.itemDragged) {
       this.itemDragged.closeDetail()
       this.itemDragged.x = this.itemDragged.input!.dragStartX
       this.itemDragged.y = this.itemDragged.input!.dragStartY
@@ -371,7 +376,7 @@ export default class GameScene extends Scene {
             )} gold`
           )
           this.drawRectangles(true)
-        } else if(gameObject instanceof ItemContainer) {
+        } else if (gameObject instanceof ItemContainer) {
           this.itemDragged = gameObject
           this.drawRectangles(false)
         }
@@ -390,7 +395,11 @@ export default class GameScene extends Scene {
         const g = <Phaser.GameObjects.Container>gameObject
         g.x = dragX
         g.y = dragY
-        if(g && this.pokemonDragged != null && this.sellZoneGraphic?.visible === false){
+        if (
+          g &&
+          this.pokemonDragged != null &&
+          this.sellZoneGraphic?.visible === false
+        ) {
           this.drawRectangles(true)
         }
       }
@@ -436,7 +445,10 @@ export default class GameScene extends Scene {
             gameObject.setPosition(x, y)
           }
           this.pokemonDragged = null
-        } else if (gameObject instanceof ItemContainer && this.itemDragged != null) {
+        } else if (
+          gameObject instanceof ItemContainer &&
+          this.itemDragged != null
+        ) {
           // Item -> Item = COMBINE
           if (dropZone instanceof ItemContainer) {
             document.getElementById("game")?.dispatchEvent(

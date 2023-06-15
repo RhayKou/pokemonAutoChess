@@ -5,7 +5,7 @@ import Shop from "../../models/shop"
 import Design, { DesignTiled } from "../../core/design"
 import BotManager from "../../core/bot-manager"
 import { DungeonData, Dungeon, StageDuration } from "../../types/Config"
-import { GamePhaseState, } from "../../types/enum/Game"
+import { GamePhaseState } from "../../types/enum/Game"
 import { Weather } from "../../types/enum/Weather"
 import {
   Schema,
@@ -16,8 +16,9 @@ import {
 } from "@colyseus/schema"
 import { Pkm } from "../../types/enum/Pokemon"
 import { pickRandomIn } from "../../utils/random"
+import Simulation from "../../core/simulation"
 
-export default class GameState extends Schema {
+export class GameState extends Schema {
   @type("string") afterGameId = ""
   @type("uint8") roundTime = StageDuration[1]
   @type("uint8") phase = GamePhaseState.PICK
@@ -25,6 +26,7 @@ export default class GameState extends Schema {
   @type({ map: PokemonAvatar }) avatars = new MapSchema<PokemonAvatar>()
   @type({ map: FloatingItem }) floatingItems = new MapSchema<FloatingItem>()
   @type(["string"]) additionalPokemons = new ArraySchema<Pkm>()
+  @type({ map: Simulation }) simulations = new MapSchema<Simulation>()
   @type("uint8") stageLevel = 1
   @type("string") mapName: string
   @type("string") weather: Weather

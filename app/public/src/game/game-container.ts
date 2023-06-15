@@ -4,7 +4,7 @@ import { getPath, transformCoordinate } from "../pages/utils/utils"
 import Phaser from "phaser"
 import Player from "../../../models/colyseus-models/player"
 import { Room } from "colyseus.js"
-import GameState from "../../../rooms/states/game-state"
+import { GameState } from "../../../rooms/states/game-state"
 import { Pokemon } from "../../../models/colyseus-models/pokemon"
 import {
   IDragDropCombineMessage,
