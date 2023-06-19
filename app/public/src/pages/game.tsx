@@ -48,7 +48,10 @@ import {
   displayEmote,
   setCurrentPlayerTitle,
   setPokemonProposition,
-  setAdditionalPokemons
+  setAdditionalPokemons,
+  addSale,
+  removeSale,
+  changeSale
 } from "../stores/GameStore"
 import { logIn, joinGame, requestTilemap } from "../stores/NetworkStore"
 import { FIREBASE_CONFIG } from "./utils/utils"
@@ -84,6 +87,8 @@ import GameScene from "../game/scenes/game-scene"
 import { toast } from "react-toastify"
 import { logger } from "../../../utils/logger"
 import { RequiredStageLevelForXpElligibility } from "../../../types/Config"
+import { Sale } from "../../../models/colyseus-models/sale"
+import { GameSales } from "./component/game/game-sales"
 
 let gameContainer: GameContainer
 
@@ -328,6 +333,27 @@ export default function Game() {
 
       room.state.additionalPokemons.onAdd((pkm) => {
         dispatch(setAdditionalPokemons(room.state.additionalPokemons))
+      })
+
+      room.state.sales.onAdd((sale) => {
+        dispatch(addSale(sale))
+        const properties: NonFunctionPropNames<Sale>[] = [
+          "id",
+          "name",
+          "price",
+          "purchaserAvatar",
+          "purchaserId",
+          "purchaserName"
+        ]
+        properties.forEach((p) => {
+          sale.listen(p, (value) => {
+            dispatch(changeSale({ id: sale.id, field: p, value: value }))
+          })
+        })
+      })
+
+      room.state.sales.onRemove((sale, key) => {
+        dispatch(removeSale(key))
       })
 
       room.state.players.onAdd((player) => {
@@ -593,6 +619,7 @@ export default function Game() {
           <GameSynergies />
           <GameItemsProposition />
           <GamePokemonsProposition />
+          <GameSales />
           <GameDpsMeter />
           <GameToasts />
           <GameOptionsIcon leave={leave} />

@@ -1,7 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { Room, Client } from "colyseus.js"
 import { User } from "@firebase/auth-types"
-import { Emotion, ICustomLobbyState, Role, Title, Transfer } from "../../../types"
+import {
+  Emotion,
+  ICustomLobbyState,
+  Role,
+  Title,
+  Transfer
+} from "../../../types"
 import { IBot } from "../../../models/mongo-models/bot-v2"
 import PreparationState from "../../../rooms/states/preparation-state"
 import GameState from "../../../rooms/states/game-state"
@@ -171,6 +177,9 @@ export const networkSlice = createSlice({
     itemClick: (state, action: PayloadAction<string>) => {
       state.game?.send(Transfer.ITEM, { id: action.payload })
     },
+    bidClick: (state, action: PayloadAction<string>) => {
+      state.game?.send(Transfer.BID, action.payload)
+    },
     gameStartRequest: (state, action: PayloadAction<string>) => {
       state.preparation?.send(Transfer.GAME_START_REQUEST, {
         token: action.payload
@@ -222,10 +231,16 @@ export const networkSlice = createSlice({
       state.lobby?.send(Transfer.GIVE_BOOSTER, action.payload)
     },
     setModerator: (state, action: PayloadAction<string>) => {
-      state.lobby?.send(Transfer.SET_ROLE, { role: Role.MODERATOR, uid: action.payload })
+      state.lobby?.send(Transfer.SET_ROLE, {
+        role: Role.MODERATOR,
+        uid: action.payload
+      })
     },
     setBotManager: (state, action: PayloadAction<string>) => {
-      state.lobby?.send(Transfer.SET_ROLE, { role: Role.BOT_MANAGER, uid: action.payload })
+      state.lobby?.send(Transfer.SET_ROLE, {
+        role: Role.BOT_MANAGER,
+        uid: action.payload
+      })
     },
     giveTitle: (
       state,
@@ -256,6 +271,7 @@ export const {
   deleteBotDatabase,
   addBotDatabase,
   ban,
+  bidClick,
   pokemonPropositionClick,
   requestLeaderboard,
   requestBotLeaderboard,

@@ -20,7 +20,8 @@ import {
   OnJoinCommand,
   OnDragDropItemCommand,
   OnDragDropCombineCommand,
-  OnPokemonPropositionCommand
+  OnPokemonPropositionCommand,
+  OnBidCommand
 } from "./commands/game-commands"
 import { ExpPlace, RequiredStageLevelForXpElligibility } from "../types/Config"
 import { Item, BasicItems } from "../types/enum/Item"
@@ -138,6 +139,19 @@ export default class GameRoom extends Room<GameState> {
       this.broadcast(Transfer.LOADING_COMPLETE)
       this.startGame()
     }, 5 * 60 * 1000) // maximum 5 minutes of loading game, game will start no matter what after that
+
+    this.onMessage(Transfer.BID, (client, message) => {
+      if (!this.state.gameFinished) {
+        try {
+          this.dispatcher.dispatch(new OnBidCommand(), {
+            playerId: client.auth.uid,
+            saleId: message
+          })
+        } catch (error) {
+          logger.error(error)
+        }
+      }
+    })
 
     this.onMessage(Transfer.ITEM, (client, message) => {
       if (!this.state.gameFinished) {
@@ -821,14 +835,25 @@ export default class GameRoom extends Room<GameState> {
           const lastWeather = player.getLastBattle()?.weather ?? Weather.NEUTRAL
           let existingSecondTier: Pkm | null = null
           player.board.forEach((pkm) => {
-            if(pkm.name === Pkm.CASCOON) existingSecondTier = Pkm.CASCOON
-            else if(pkm.name === Pkm.SILCOON) existingSecondTier = Pkm.SILCOON
+            if (pkm.name === Pkm.CASCOON) existingSecondTier = Pkm.CASCOON
+            else if (pkm.name === Pkm.SILCOON) existingSecondTier = Pkm.SILCOON
           })
-          if(existingSecondTier !== null){ 
+          if (existingSecondTier !== null) {
             pokemonEvolutionName = existingSecondTier
-          } else if([Weather.NIGHT, Weather.STORM, Weather.SANDSTORM, Weather.SNOW].includes(lastWeather)){
+          } else if (
+            [
+              Weather.NIGHT,
+              Weather.STORM,
+              Weather.SANDSTORM,
+              Weather.SNOW
+            ].includes(lastWeather)
+          ) {
             pokemonEvolutionName = Pkm.CASCOON
-          } else if([Weather.SUN, Weather.RAIN, Weather.MISTY, Weather.WINDY].includes(lastWeather)){
+          } else if (
+            [Weather.SUN, Weather.RAIN, Weather.MISTY, Weather.WINDY].includes(
+              lastWeather
+            )
+          ) {
             pokemonEvolutionName = Pkm.SILCOON
           } else {
             pokemonEvolutionName = coinflip() ? Pkm.CASCOON : Pkm.SILCOON

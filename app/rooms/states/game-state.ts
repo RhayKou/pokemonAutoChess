@@ -1,11 +1,12 @@
 import Player from "../../models/colyseus-models/player"
+import { Bid } from "../../models/colyseus-models/bid"
 import { PokemonAvatar } from "../../models/colyseus-models/pokemon-avatar"
 import { FloatingItem } from "../../models/colyseus-models/floating-item"
 import Shop from "../../models/shop"
 import Design, { DesignTiled } from "../../core/design"
 import BotManager from "../../core/bot-manager"
 import { DungeonData, Dungeon, StageDuration } from "../../types/Config"
-import { GamePhaseState, } from "../../types/enum/Game"
+import { GamePhaseState } from "../../types/enum/Game"
 import { Weather } from "../../types/enum/Weather"
 import {
   Schema,
@@ -16,6 +17,7 @@ import {
 } from "@colyseus/schema"
 import { Pkm } from "../../types/enum/Pokemon"
 import { pickRandomIn } from "../../utils/random"
+import { Sale } from "../../models/colyseus-models/sale"
 
 export default class GameState extends Schema {
   @type("string") afterGameId = ""
@@ -30,6 +32,7 @@ export default class GameState extends Schema {
   @type("string") weather: Weather
   @type("boolean") noElo = false
   @type({ set: "string" }) spectators = new SetSchema<string>()
+  @type({ map: Sale }) sales = new MapSchema<Sale>()
   time = StageDuration[1] * 1000
   botManager: BotManager = new BotManager()
   shop: Shop = new Shop()

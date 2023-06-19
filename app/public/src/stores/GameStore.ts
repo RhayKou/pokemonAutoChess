@@ -14,6 +14,8 @@ import { toast } from "react-toastify"
 import React from "react"
 import { getAvatarSrc } from "../utils"
 import { StageDuration } from "../../../types/Config"
+import { ISale } from "../../../models/colyseus-models/sale"
+import { removeInArray } from "../../../utils/array"
 
 interface GameStateStore {
   afterGameId: string
@@ -51,6 +53,7 @@ interface GameStateStore {
   redHealDpsMeter: IDpsHeal[]
   pokemonCollection: MapSchema<IPokemonConfig>
   additionalPokemons: Pkm[]
+  sales: ISale[]
 }
 
 const initialState: GameStateStore = {
@@ -88,7 +91,8 @@ const initialState: GameStateStore = {
   blueHealDpsMeter: new Array<IDpsHeal>(),
   redHealDpsMeter: new Array<IDpsHeal>(),
   pokemonCollection: new MapSchema<IPokemonConfig>(),
-  additionalPokemons: new Array<Pkm>()
+  additionalPokemons: new Array<Pkm>(),
+  sales: new Array<ISale>()
 }
 
 export const gameSlice = createSlice({
@@ -165,6 +169,20 @@ export const gameSlice = createSlice({
     },
     setAdditionalPokemons: (state, action: PayloadAction<Pkm[]>) => {
       state.additionalPokemons = JSON.parse(JSON.stringify(action.payload))
+    },
+    addSale: (state, action: PayloadAction<ISale>) => {
+      state.sales.push(JSON.parse(JSON.stringify(action.payload)))
+    },
+    removeSale: (state, action: PayloadAction<string>) => {
+      const item = state.sales.find((s) => s.id === action.payload)
+      removeInArray(state.sales, item)
+    },
+    changeSale: (
+      state,
+      action: PayloadAction<{ id: string; field: string; value: any }>
+    ) => {
+      const index = state.sales.findIndex((e) => action.payload.id === e.id)
+      state.sales[index][action.payload.field] = action.payload.value
     },
     setSynergies: (
       state,
@@ -504,7 +522,10 @@ export const {
   setShopLocked,
   changePlayer,
   setShop,
-  setItemsProposition
+  setItemsProposition,
+  addSale,
+  removeSale,
+  changeSale
 } = gameSlice.actions
 
 export default gameSlice.reducer

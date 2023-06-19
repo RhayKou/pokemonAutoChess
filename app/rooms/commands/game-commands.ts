@@ -9,12 +9,13 @@ import {
   MythicalPicksStages,
   Mythical1Shop,
   Mythical2Shop,
-  MAX_PLAYERS_PER_LOBBY
+  MAX_PLAYERS_PER_LOBBY,
+  NUMBER_OF_BIDS
 } from "../../types/Config"
 import { Item, BasicItems } from "../../types/enum/Item"
 import { BattleResult } from "../../types/enum/Game"
-import { Weather } from "../../types/enum/Weather"
 import Player from "../../models/colyseus-models/player"
+import { Sale } from "../../models/colyseus-models/sale"
 import PokemonFactory from "../../models/pokemon-factory"
 import ItemFactory from "../../models/item-factory"
 import UserMetadata from "../../models/mongo-models/user-metadata"
@@ -42,6 +43,8 @@ import { Ability } from "../../types/enum/Ability"
 import { chance, pickRandomIn } from "../../utils/random"
 import { logger } from "../../utils/logger"
 import { Passive } from "../../types/enum/Passive"
+import { removeInArray } from "../../utils/array"
+import { Bid } from "../../models/colyseus-models/bid"
 
 export class OnShopCommand extends Command<
   GameRoom,
@@ -117,6 +120,35 @@ export class OnItemCommand extends Command<
       while (player.itemsProposition.length > 0) {
         player.itemsProposition.pop()
       }
+    }
+  }
+}
+
+export class OnBidCommand extends Command<
+  GameRoom,
+  {
+    playerId: string
+    saleId: string
+  }
+> {
+  execute({ playerId, saleId }) {
+    const player = this.state.players.get(playerId)
+    const sale = this.state.sales.get(saleId)
+    if (player && sale && player.alive && player.money >= sale.price) {
+      if (this.state.time < 3000) {
+        this.state.time += 3000
+      }
+      sale.purchaserAvatar = player.avatar
+      sale.purchaserId = player.id
+      sale.purchaserName = player.name
+      sale.price += 1
+      // this.state.sales.forEach((s) => {
+      //   if (s.id !== sale.id && sale.purchaserId === player.id) {
+      //     sale.purchaserAvatar = ""
+      //     sale.purchaserId = ""
+      //     sale.purchaserName = ""
+      //   }
+      // })
     }
   }
 }
@@ -1172,15 +1204,21 @@ export class OnUpdatePhaseCommand extends Command<GameRoom, any> {
     }
 
     if (this.state.stageLevel === MythicalPicksStages[0]) {
-      this.state.players.forEach((player: Player) => {
-        this.state.shop.assignMythicalPropositions(player, Mythical1Shop)
-      })
+      this.initializeAuctions(Mythical1Shop)
     }
 
     if (this.state.stageLevel === MythicalPicksStages[1]) {
-      this.state.players.forEach((player: Player) => {
-        this.state.shop.assignMythicalPropositions(player, Mythical2Shop)
-      })
+      this.initializeAuctions(Mythical2Shop)
+    }
+  }
+
+  initializeAuctions(list: Pkm[]) {
+    const mythicals = [...list] as Pkm[]
+    for (let i = 0; i < NUMBER_OF_BIDS; i++) {
+      const pkm = pickRandomIn(mythicals)
+      removeInArray(mythicals, pkm)
+      const sale = new Sale(pkm)
+      this.state.sales.set(sale.id, sale)
     }
   }
 
@@ -1264,6 +1302,25 @@ export class OnUpdatePhaseCommand extends Command<GameRoom, any> {
         }
       }
     })
+
+    this.state.sales.forEach((sale) => {
+      if (sale.purchaserId && sale.purchaserId !== "") {
+        const player = this.state.players.get(sale.purchaserId)
+        if (player) {
+          player.money -= sale.price
+          const pokemon = PokemonFactory.createPokemonFromName(
+            sale.name,
+            player.pokemonCollection.get(PkmIndex[sale.name])
+          )
+          const x = this.room.getFirstAvailablePositionInBench(player.id)
+          if (x === undefined) return
+          pokemon.positionX = x
+          pokemon.positionY = 0
+          player.board.set(pokemon.id, pokemon)
+        }
+      }
+    })
+    this.state.sales.clear()
   }
 
   stopFightingPhase() {
