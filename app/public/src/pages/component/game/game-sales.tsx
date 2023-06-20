@@ -46,7 +46,9 @@ export function GameSale(props: { sale: ISale; key: number }) {
         pokemonConfig={pokemonCollection.get(p.index)}
         click={() => null}
       />
-      <div>
+      <div
+        style={{ display: "flex", flexFlow: "column", alignItems: "center" }}
+      >
         {props.sale.purchaserId !== "" && props.sale.purchaserAvatar !== "" ? (
           <img
             src={getAvatarSrc(props.sale.purchaserAvatar)}
@@ -54,8 +56,15 @@ export function GameSale(props: { sale: ISale; key: number }) {
           />
         ) : null}
 
-        <span>{props.sale.purchaserName}</span>
-        <Money value={props.sale.price} />
+        <span style={{ textAlign: "center" }}>{props.sale.purchaserName}</span>
+        {
+          <div className="game-sale-description">
+            <Money
+              value={props.sale.price}
+              size={props.sale.purchaserId === "" ? 2 : undefined}
+            />
+          </div>
+        }
       </div>
     </div>
   )

@@ -12,6 +12,20 @@
 .game-sale {
   display: flex;
   gap: 5px;
-  width: 12vw;
+  width: 13vw;
   color: white;
+}
+
+.game-sale-money{
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    gap: 2px;
+}
+
+.game-sale-description{
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    gap: 2px;
 }

@@ -142,13 +142,13 @@ export class OnBidCommand extends Command<
       sale.purchaserId = player.id
       sale.purchaserName = player.name
       sale.price += 1
-      // this.state.sales.forEach((s) => {
-      //   if (s.id !== sale.id && sale.purchaserId === player.id) {
-      //     sale.purchaserAvatar = ""
-      //     sale.purchaserId = ""
-      //     sale.purchaserName = ""
-      //   }
-      // })
+      this.state.sales.forEach((s) => {
+        if (s !== sale && s.purchaserId === player.id) {
+          s.purchaserAvatar = ""
+          s.purchaserId = ""
+          s.purchaserName = ""
+        }
+      })
     }
   }
 }
