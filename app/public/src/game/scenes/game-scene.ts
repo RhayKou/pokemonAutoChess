@@ -27,6 +27,7 @@ import { Item } from "../../../../types/enum/Item"
 import Player from "../../../../models/colyseus-models/player"
 import MinigameManager from "../components/minigame-manager"
 import LoadingManager from "../components/loading-manager"
+import SlingshotGameManager from "../components/slingshot-game-manager"
 
 export default class GameScene extends Scene {
   tilemap: DesignTiled | undefined
@@ -51,6 +52,7 @@ export default class GameScene extends Scene {
   lastDragDropPokemon: Pokemon | undefined
   lastPokemonDetail: Pokemon | undefined
   minigameManager: MinigameManager
+  slingshotManager: SlingshotGameManager
   loadingManager: LoadingManager
   started: boolean
   spectate: boolean
@@ -109,6 +111,13 @@ export default class GameScene extends Scene {
         this.uid,
         this.room.state.avatars,
         this.room.state.floatingItems
+      )
+      this.slingshotManager = new SlingshotGameManager(
+        this,
+        this.animationManager,
+        this.uid,
+        this.room.state.slingShotAvatars,
+        this.room.state.slingShotBoxes
       )
 
       const playerUids: string[] = []
@@ -210,7 +219,10 @@ export default class GameScene extends Scene {
     this.resetDragState()
     if (this.room?.state.phase == GamePhaseState.FIGHT) {
       this.board?.battleMode()
-    } else if (this.room?.state.phase === GamePhaseState.MINIGAME) {
+    } else if (
+      this.room?.state.phase === GamePhaseState.MINIGAME ||
+      this.room?.state.phase === GamePhaseState.SLINGSHOT_GAME
+    ) {
       this.board?.minigameMode()
     } else {
       this.board?.pickMode()

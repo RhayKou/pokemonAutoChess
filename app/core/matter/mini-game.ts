@@ -27,29 +27,14 @@ export class MiniGame {
   bodies: Map<string, Body>
   alivePlayers: Player[]
   engine: Engine
-  centerX: number = 325
-  centerY: number = 250
+  centerX = 325
+  centerY = 250
 
   constructor() {
     this.engine = Engine.create({ gravity: { x: 0, y: 0 } })
     this.bodies = new Map<string, Body>()
     this.alivePlayers = []
-    Composite.add(
-      this.engine.world,
-      Bodies.rectangle(0, -70, 2000, 40, { isStatic: true, restitution: 1 })
-    )
-    Composite.add(
-      this.engine.world,
-      Bodies.rectangle(-70, 0, 40, 2000, { isStatic: true, restitution: 1 })
-    )
-    Composite.add(
-      this.engine.world,
-      Bodies.rectangle(740, 0, 40, 2000, { isStatic: true, restitution: 1 })
-    )
-    Composite.add(
-      this.engine.world,
-      Bodies.rectangle(0, 610, 2000, 40, { isStatic: true, restitution: 1 })
-    )
+
     Events.on(this.engine, "beforeUpdate", (event) => {
       this.items?.forEach((item) => {
         if (item.avatarId === "") {

@@ -8,7 +8,7 @@ export class FloatingItem extends Schema implements IFloatingItem {
   @type("string") name: Item = Item.LEFTOVERS
   @type("number") x: number
   @type("number") y: number
-  @type("string") avatarId: string = ""
+  @type("string") avatarId = ""
   index: number
 
   constructor(name: Item, x: number, y: number, index: number) {

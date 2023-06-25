@@ -12,7 +12,8 @@ export enum Rarity {
 export enum GamePhaseState {
   PICK,
   FIGHT,
-  MINIGAME
+  MINIGAME,
+  SLINGSHOT_GAME
 }
 
 export enum PokemonActionState {
@@ -97,5 +98,5 @@ export enum Team {
 }
 
 export enum BoardEvent {
-  LIGHTNING = "LIGHTNING",
+  LIGHTNING = "LIGHTNING"
 }

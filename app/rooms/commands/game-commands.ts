@@ -802,6 +802,8 @@ export class OnUpdateCommand extends Command<
         }
       } else if (this.state.phase === GamePhaseState.MINIGAME) {
         this.room.miniGame.update(deltaTime)
+      } else if (this.state.phase === GamePhaseState.SLINGSHOT_GAME) {
+        this.room.slingshotGame.update(deltaTime)
       }
       if (updatePhaseNeeded) {
         return [new OnUpdatePhaseCommand()]
@@ -814,6 +816,9 @@ export class OnUpdatePhaseCommand extends Command<GameRoom, any> {
   execute() {
     if (this.state.phase == GamePhaseState.MINIGAME) {
       this.room.miniGame.stop(this.state.players)
+      this.initializePickingPhase()
+    } else if (this.state.phase === GamePhaseState.SLINGSHOT_GAME) {
+      this.room.slingshotGame.stop(this.state.players)
       this.initializePickingPhase()
     } else if (this.state.phase == GamePhaseState.PICK) {
       this.stopPickingPhase()
@@ -830,6 +835,8 @@ export class OnUpdatePhaseCommand extends Command<GameRoom, any> {
 
       if (CarouselStages.includes(this.state.stageLevel)) {
         this.initializeMinigamePhase()
+      } else if (AdditionalPicksStages.includes(this.state.stageLevel)) {
+        this.initializeSlingShotPhase()
       } else {
         this.initializePickingPhase()
       }
@@ -1388,6 +1395,15 @@ export class OnUpdatePhaseCommand extends Command<GameRoom, any> {
     this.room.miniGame.initialize(this.state.players, this.state.stageLevel)
   }
 
+  initializeSlingShotPhase() {
+    this.state.phase = GamePhaseState.SLINGSHOT_GAME
+    this.state.time = 300000
+    this.room.slingshotGame.initialize(
+      this.state.players,
+      this.room.additionalPokemonsPool1
+    )
+  }
+
   initializeFightingPhase() {
     this.state.phase = GamePhaseState.FIGHT
     this.state.time = FIGHTING_PHASE_DURATION
@@ -1403,7 +1419,11 @@ export class OnUpdatePhaseCommand extends Command<GameRoom, any> {
         if (stageIndex != -1) {
           player.opponentId = "pve"
           player.opponentName = NeutralStage[stageIndex].name
-          player.opponentAvatar = getAvatarString(PkmIndex[NeutralStage[stageIndex].avatar], this.state.shinyEncounter, Emotion.NORMAL)
+          player.opponentAvatar = getAvatarString(
+            PkmIndex[NeutralStage[stageIndex].avatar],
+            this.state.shinyEncounter,
+            Emotion.NORMAL
+          )
           player.opponentTitle = "Wild"
           const pveBoard = PokemonFactory.getNeutralPokemonsByLevelStage(
             this.state.stageLevel,

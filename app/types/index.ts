@@ -38,6 +38,9 @@ import { Weather } from "./enum/Weather"
 
 export * from "./enum/Emotion"
 
+export const WORLD_WIDTH = 1900
+export const WORLD_HEIGHT = 850
+
 export const FIGHTING_PHASE_DURATION = 40000
 
 export const CDN_PORTRAIT_URL =
@@ -305,6 +308,13 @@ export interface IPokemonAvatar {
 export interface IFloatingItem {
   id: string
   name: Item
+  x: number
+  y: number
+}
+
+export interface ISlingshotBox {
+  id: string
+  name: Pkm
   x: number
   y: number
 }

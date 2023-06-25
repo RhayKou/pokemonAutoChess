@@ -13,7 +13,9 @@ import { getPortraitSrc } from "../../../utils"
 import SynergyIcon from "../icons/synergy-icon"
 import { EffectDescriptionComponent } from "../synergy/effect-description"
 import { GamePokemonDetail } from "../game/game-pokemon-detail"
-import PokemonFactory, { isAdditionalPick } from "../../../../../models/pokemon-factory"
+import PokemonFactory, {
+  isAdditionalPick
+} from "../../../../../models/pokemon-factory"
 import { groupBy } from "../../../../../utils/array"
 import { Pokemon } from "../../../../../models/colyseus-models/pokemon"
 import { Rarity } from "../../../../../types/enum/Game"
@@ -26,9 +28,11 @@ export default function WikiType(props: { type: Synergy | "all" }) {
 
   let pokemonsNames: Pkm[]
   if (props.type === "all") {
-    pokemonsNames = Object.values(Pkm).filter(p => p!== Pkm.DEFAULT)
+    pokemonsNames = Object.values(Pkm).filter((p) => p !== Pkm.DEFAULT)
   } else {
-    pokemonsNames = PRECOMPUTED_TYPE_POKEMONS_ALL[props.type].filter(p => p!== Pkm.DEFAULT) as Pkm[]
+    pokemonsNames = PRECOMPUTED_TYPE_POKEMONS_ALL[props.type].filter(
+      (p) => p !== Pkm.DEFAULT
+    ) as Pkm[]
   }
 
   const pokemons = pokemonsNames
@@ -45,13 +49,13 @@ export default function WikiType(props: { type: Synergy | "all" }) {
     })
 
   const pokemonsPerRarity = groupBy(pokemons, (p) => p.rarity)
-  for (let rarity in pokemonsPerRarity) {
-    pokemonsPerRarity[rarity].sort(
-      (a: Pokemon, b: Pokemon) => {
-        const isAddA = isAdditionalPick(a.name), isAddB= isAdditionalPick(b.name)
-        if(isAddA !== isAddB) return +isAddA - +isAddB
-        return a.index < b.index ? -1 : 1
-      })
+  for (const rarity in pokemonsPerRarity) {
+    pokemonsPerRarity[rarity].sort((a: Pokemon, b: Pokemon) => {
+      const isAddA = isAdditionalPick(a.name),
+        isAddB = isAdditionalPick(b.name)
+      if (isAddA !== isAddB) return +isAddA - +isAddB
+      return a.index < b.index ? -1 : 1
+    })
   }
 
   return (
@@ -64,8 +68,13 @@ export default function WikiType(props: { type: Synergy | "all" }) {
           <p>{addIconsToDescription(SynergyDescription[props.type].eng)}</p>
           {SynergyEffects[props.type].map((effect, i) => {
             return (
-              <div key={EffectName[effect]} style={{ display: "flex", alignItems: "center" }}>
-                <span>({SynergyTriggers[props.type][i]}) {EffectName[effect]}:&nbsp;</span>
+              <div
+                key={EffectName[effect]}
+                style={{ display: "flex", alignItems: "center" }}
+              >
+                <span>
+                  ({SynergyTriggers[props.type][i]}) {EffectName[effect]}:&nbsp;
+                </span>
                 <EffectDescriptionComponent effect={effect} />
               </div>
             )

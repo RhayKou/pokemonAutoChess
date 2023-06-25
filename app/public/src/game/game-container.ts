@@ -17,7 +17,8 @@ import {
   IPokemonEntity,
   Transfer,
   NonFunctionPropNames,
-  ISimplePlayer
+  ISimplePlayer,
+  ISlingshotBox
 } from "../../../types"
 import PokemonEntity from "../../../core/pokemon-entity"
 import { Item } from "../../../types/enum/Item"
@@ -37,6 +38,7 @@ import { FloatingItem } from "../../../models/colyseus-models/floating-item"
 import Status from "../../../models/colyseus-models/status"
 import Count from "../../../models/colyseus-models/count"
 import { Ability } from "../../../types/enum/Ability"
+import { SlingshotBox } from "./components/slingshot-box"
 
 class GameContainer {
   room: Room<GameState>
@@ -130,6 +132,40 @@ class GameContainer {
 
     this.room.state.floatingItems.onRemove((value, key) => {
       this.handleFloatingItemRemove(value)
+    })
+
+    this.room.state.slingShotAvatars.onAdd((avatar) => {
+      this.handleSlingshotAvatarAdd(avatar)
+      const fields: NonFunctionPropNames<PokemonAvatar>[] = [
+        "x",
+        "y",
+        "action",
+        "timer",
+        "orientation"
+      ]
+      fields.forEach((field) => {
+        avatar.listen(field, (value, previousValue) => {
+          this.handleSlingshotAvatarChange(avatar, field, value)
+        })
+      })
+    })
+
+    this.room.state.slingShotAvatars.onRemove((value, key) => {
+      this.handleSlingshotAvatarRemove(value)
+    })
+
+    this.room.state.slingShotBoxes.onAdd((box) => {
+      this.handleSlingshotBoxAdd(box)
+      const fields: NonFunctionPropNames<ISlingshotBox>[] = ["x", "y"]
+      fields.forEach((field) => {
+        box.listen(field, (value, previousValue) => {
+          this.handleSlingshotBoxChange(box, field, value)
+        })
+      })
+    })
+
+    this.room.state.slingShotBoxes.onRemove((value, key) => {
+      this.handleSlingshotBoxRemove(value)
     })
     this.room.onError((err) => logger.error("room error", err))
   }
@@ -713,6 +749,24 @@ class GameContainer {
     }
   }
 
+  handleSlingshotAvatarAdd(avatar: IPokemonAvatar) {
+    if (this.game != null && this.game.scene.getScene("gameScene")) {
+      const g = <GameScene>this.game.scene.getScene("gameScene")
+      if (g.slingshotManager) {
+        g.slingshotManager.addPokemon(avatar)
+      }
+    }
+  }
+
+  handleSlingshotBoxAdd(box: ISlingshotBox) {
+    if (this.game != null && this.game.scene.getScene("gameScene")) {
+      const g = <GameScene>this.game.scene.getScene("gameScene")
+      if (g.slingshotManager) {
+        g.slingshotManager.addbox(box)
+      }
+    }
+  }
+
   handleBoardPokemonAdd(player: IPlayer, pokemon: IPokemon) {
     if (this.game != null && this.game.scene.getScene("gameScene")) {
       const g = <GameScene>this.game.scene.getScene("gameScene")
@@ -749,6 +803,24 @@ class GameContainer {
     }
   }
 
+  handleSlingshotAvatarRemove(avatar: IPokemonAvatar) {
+    if (this.game != null && this.game.scene.getScene("gameScene")) {
+      const g = <GameScene>this.game.scene.getScene("gameScene")
+      if (g.slingshotManager) {
+        g.slingshotManager.removePokemon(avatar)
+      }
+    }
+  }
+
+  handleSlingshotBoxRemove(box: ISlingshotBox) {
+    if (this.game != null && this.game.scene.getScene("gameScene")) {
+      const g = <GameScene>this.game.scene.getScene("gameScene")
+      if (g.slingshotManager) {
+        g.slingshotManager.removebox(box)
+      }
+    }
+  }
+
   handleBoardPokemonChange(
     player: IPlayer,
     pokemon: IPokemon,
@@ -781,6 +853,28 @@ class GameContainer {
       const g = <GameScene>this.game.scene.getScene("gameScene")
       if (g.minigameManager) {
         g.minigameManager.changeItem(floatingItem, field, value)
+      }
+    }
+  }
+
+  handleSlingshotAvatarChange(
+    avatar: IPokemonAvatar,
+    field: string,
+    value: any
+  ) {
+    if (this.game != null && this.game.scene.getScene("gameScene")) {
+      const g = <GameScene>this.game.scene.getScene("gameScene")
+      if (g.slingshotManager) {
+        g.slingshotManager.changePokemon(avatar, field, value)
+      }
+    }
+  }
+
+  handleSlingshotBoxChange(box: ISlingshotBox, field: string, value: any) {
+    if (this.game != null && this.game.scene.getScene("gameScene")) {
+      const g = <GameScene>this.game.scene.getScene("gameScene")
+      if (g.slingshotManager) {
+        g.slingshotManager.changebox(box, field, value)
       }
     }
   }

@@ -16,7 +16,7 @@ export class PokemonAvatarModel extends Schema implements IPokemonAvatar {
   @type("string") action: PokemonActionState = PokemonActionState.IDLE
   @type("string") orientation: Orientation = Orientation.DOWNLEFT
   @type("number") timer: number
-  itemId: string = ""
+  itemId = ""
   constraint: Constraint | undefined
 
   constructor(id: string, avatar: string, x: number, y: number, timer: number) {
@@ -28,7 +28,9 @@ export class PokemonAvatarModel extends Schema implements IPokemonAvatar {
     this.targetY = y
     this.timer = timer
     const { index, shiny } = getPokemonConfigFromAvatar(avatar)
-    this.name = Object.keys(PkmIndex).find((pkm) => PkmIndex[pkm] === index) as Pkm
+    this.name = Object.keys(PkmIndex).find(
+      (pkm) => PkmIndex[pkm] === index
+    ) as Pkm
     this.shiny = shiny
   }
 }

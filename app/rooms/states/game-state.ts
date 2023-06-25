@@ -5,7 +5,7 @@ import Shop from "../../models/shop"
 import Design, { DesignTiled } from "../../core/design"
 import BotManager from "../../core/bot-manager"
 import { DungeonData, Dungeon, StageDuration } from "../../types/Config"
-import { GamePhaseState, } from "../../types/enum/Game"
+import { GamePhaseState } from "../../types/enum/Game"
 import { Weather } from "../../types/enum/Weather"
 import {
   Schema,
@@ -16,6 +16,7 @@ import {
 } from "@colyseus/schema"
 import { Pkm } from "../../types/enum/Pokemon"
 import { pickRandomIn } from "../../utils/random"
+import { SlingshotBox } from "../../models/colyseus-models/slingshot-box"
 
 export default class GameState extends Schema {
   @type("string") afterGameId = ""
@@ -23,7 +24,10 @@ export default class GameState extends Schema {
   @type("uint8") phase = GamePhaseState.PICK
   @type({ map: Player }) players = new MapSchema<Player>()
   @type({ map: PokemonAvatarModel }) avatars = new MapSchema<PokemonAvatarModel>()
+  @type({ map: PokemonAvatar }) slingShotAvatars =
+    new MapSchema<PokemonAvatar>()
   @type({ map: FloatingItem }) floatingItems = new MapSchema<FloatingItem>()
+  @type({ map: SlingshotBox }) slingShotBoxes = new MapSchema<SlingshotBox>()
   @type(["string"]) additionalPokemons = new ArraySchema<Pkm>()
   @type("uint8") stageLevel = 1
   @type("string") mapName: string

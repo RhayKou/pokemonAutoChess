@@ -54,6 +54,7 @@ import { Rarity } from "../types/enum/Game"
 import { Weather } from "../types/enum/Weather"
 import { FilterQuery } from "mongoose"
 import { MiniGame } from "../core/matter/mini-game"
+import { SlingshotGame } from "../core/matter/slingshot-game"
 import { logger } from "../utils/logger"
 import { computeElo } from "../core/elo"
 import { Passive } from "../types/enum/Passive"
@@ -64,6 +65,7 @@ export default class GameRoom extends Room<GameState> {
   additionalPokemonsPool1: Array<Pkm>
   additionalPokemonsPool2: Array<Pkm>
   miniGame: MiniGame
+  slingshotGame: SlingshotGame
   constructor() {
     super()
     this.dispatcher = new Dispatcher(this)
@@ -71,6 +73,7 @@ export default class GameRoom extends Room<GameState> {
     this.additionalPokemonsPool1 = new Array<Pkm>()
     this.additionalPokemonsPool2 = new Array<Pkm>()
     this.miniGame = new MiniGame()
+    this.slingshotGame = new SlingshotGame()
   }
 
   // When room is initialized
@@ -93,6 +96,10 @@ export default class GameRoom extends Room<GameState> {
       new GameState(options.preparationId, options.name, options.noElo)
     )
     this.miniGame.create(this.state.avatars, this.state.floatingItems)
+    this.slingshotGame.create(
+      this.state.slingShotAvatars,
+      this.state.slingShotBoxes
+    )
     Object.keys(PRECOMPUTED_TYPE_POKEMONS).forEach((type) => {
       PRECOMPUTED_TYPE_POKEMONS[type].additionalPokemons.forEach((p) => {
         const pokemon = PokemonFactory.createPokemonFromName(p)

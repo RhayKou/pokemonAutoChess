@@ -369,8 +369,8 @@ export const StageDuration: Record<number | "DEFAULT", number> = {
 }
 
 export const CarouselStages = [4, 7, 12, 17, 22, 27, 32, 37, 42]
-export const ItemProposalStages = [2, 3]
-export const AdditionalPicksStages = [5, 8]
+export const ItemProposalStages = [22, 33]
+export const AdditionalPicksStages = [2, 8]
 export const MythicalPicksStages = [10, 20]
 
 export const NeutralStage: { turn: number; name: string; avatar: Pkm }[] = [
