@@ -136,7 +136,7 @@ class GameContainer {
 
     this.room.state.slingShotAvatars.onAdd((avatar) => {
       this.handleSlingshotAvatarAdd(avatar)
-      const fields: NonFunctionPropNames<PokemonAvatar>[] = [
+      const fields: NonFunctionPropNames<PokemonAvatarModel>[] = [
         "x",
         "y",
         "action",

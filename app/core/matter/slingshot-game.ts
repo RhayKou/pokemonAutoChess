@@ -1,24 +1,27 @@
-import { Bodies, Engine, Body, Composite, World, Composites } from "matter-js"
-import { PokemonAvatar } from "../../models/colyseus-models/pokemon-avatar"
+import { Bodies, Engine, Body, Composite, Composites } from "matter-js"
+import { PokemonAvatarModel } from "../../models/colyseus-models/pokemon-avatar"
 import { MapSchema } from "@colyseus/schema"
 import Player from "../../models/colyseus-models/player"
 import { Pkm } from "../../types/enum/Pokemon"
 import { SlingshotBox } from "../../models/colyseus-models/slingshot-box"
 import { WORLD_HEIGHT, WORLD_WIDTH } from "../../types"
+import { pickNRandomIn, pickRandomIn } from "../../utils/random"
 
 export class SlingshotGame {
   engine = Engine.create()
-  avatars: MapSchema<PokemonAvatar> | undefined
+  avatars: MapSchema<PokemonAvatarModel> | undefined
   boxes: MapSchema<SlingshotBox> | undefined
   alivePlayers = new Array<Player>()
   bodies = new Map<string, Body>()
-  slingShotBoxStartX = 1000
   boxesPerColumn = 10
   boxSize = 40
   width = WORLD_WIDTH
   height = WORLD_HEIGHT
 
-  create(avatars: MapSchema<PokemonAvatar>, boxes: MapSchema<SlingshotBox>) {
+  create(
+    avatars: MapSchema<PokemonAvatarModel>,
+    boxes: MapSchema<SlingshotBox>
+  ) {
     this.avatars = avatars
     this.boxes = boxes
 
@@ -36,7 +39,6 @@ export class SlingshotGame {
   }
 
   initialize(players: MapSchema<Player>, additionalPokemons: Pkm[]) {
-    const pkms = additionalPokemons.slice()
     players.forEach((player) => {
       if (player.alive) {
         this.alivePlayers.push(player)
@@ -46,7 +48,13 @@ export class SlingshotGame {
       const y = i * 100 + 70
       const x = 250
 
-      const avatar = new PokemonAvatar(player.id, player.avatar, 0, x, y)
+      const avatar = new PokemonAvatarModel(
+        player.id,
+        player.avatar,
+        x,
+        y,
+        3000
+      )
 
       this.avatars!.set(avatar.id, avatar)
       const body = Bodies.circle(x, y, 30, { isStatic: true })
@@ -55,17 +63,37 @@ export class SlingshotGame {
       Composite.add(this.engine.world, body)
     })
 
+    // pkms.forEach((pkm, i) => {
+    //   const x = WORLD_WIDTH - 200 + Math.abs(i / 10) * this.boxSize
+    //   const y = WORLD_HEIGHT - (i % 10) * this.boxSize
+    //   const slingShotBox = new SlingshotBox(pkm, x, y)
+    //   this.boxes?.set(slingShotBox.id, slingShotBox)
+    //   const body = Bodies.rectangle(x, y, this.boxSize, this.boxSize, {
+    //     restitution: 0,
+    //     frictionAir: 0.01,
+    //     frictionStatic: 0.5,
+    //     friction: 0.1,
+    //     density: 0.001
+    //   })
+    //   body.label = slingShotBox.id
+    //   this.bodies.set(slingShotBox.id, body)
+    //   Composite.add(this.engine.world, body)
+    // })
+
+    const base = 13
     const pyramid = Composites.pyramid(
-      WORLD_WIDTH - 200,
-      50,
-      8,
-      6,
-      0,
-      0,
+      (2 * WORLD_WIDTH) / 3,
+      WORLD_HEIGHT - (Math.abs(base / 2) + 1) * this.boxSize,
+      base,
+      10,
+      1,
+      1,
       (x, y) => {
-        const name = pkms.pop()
-        const pkm = name ? name : Pkm.MAGIKARP
-        const slingShotBox = new SlingshotBox(pkm, x, y)
+        const slingShotBox = new SlingshotBox(
+          pickRandomIn(additionalPokemons),
+          x,
+          y
+        )
         this.boxes?.set(slingShotBox.id, slingShotBox)
         const body = Bodies.rectangle(x, y, this.boxSize, this.boxSize)
         body.label = slingShotBox.id
@@ -73,6 +101,7 @@ export class SlingshotGame {
         return body
       }
     )
+
     Composite.add(this.engine.world, pyramid)
   }
 

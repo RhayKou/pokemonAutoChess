@@ -12,8 +12,9 @@ import {
   transformMiniGameYCoordinate
 } from "../../pages/utils/utils"
 import { SlingshotBox } from "./slingshot-box"
+import PokemonAvatar from "./pokemon-avatar"
 
-export default class SlingshotGameManager {
+export default class MinigameManager {
   pokemons: Map<string, Pokemon>
   boxes: Map<string, SlingshotBox>
   uid: string
@@ -26,7 +27,7 @@ export default class SlingshotGameManager {
     animationManager: AnimationManager,
     uid: string,
     avatars: Map<string, IPokemonAvatar>,
-    boxes: Map<string, ISlingshotBox>
+    items: Map<string, ISlingshotBox>
   ) {
     this.pokemons = new Map<string, Pokemon>()
     this.boxes = new Map<string, SlingshotBox>()
@@ -35,7 +36,7 @@ export default class SlingshotGameManager {
     this.display = false
     this.animationManager = animationManager
     this.buildPokemons(avatars)
-    this.buildBoxes(boxes)
+    this.buildBoxes(items)
   }
 
   buildPokemons(avatars: Map<string, IPokemonAvatar>) {
@@ -109,13 +110,12 @@ export default class SlingshotGameManager {
   }
 
   addPokemon(pokemon: IPokemonAvatar) {
-    const pokemonUI = new Pokemon(
+    const pokemonUI = new PokemonAvatar(
       this.scene,
       pokemon.x,
       pokemon.y,
       pokemon,
-      pokemon.id,
-      true
+      pokemon.id
     )
 
     if (pokemonUI.isCurrentPlayerAvatar) {
@@ -175,7 +175,9 @@ export default class SlingshotGameManager {
           break
 
         case "timer":
-          pokemonUI.updateCircleTimer(value)
+          if (pokemonUI instanceof PokemonAvatar) {
+            pokemonUI.updateCircleTimer(value)
+          }
           break
       }
     }

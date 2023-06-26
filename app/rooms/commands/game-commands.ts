@@ -1072,7 +1072,7 @@ export class OnUpdatePhaseCommand extends Command<GameRoom, any> {
       const currentResult = player.getCurrentBattleResult()
       const lastPlayerResult = player.getLastPlayerBattleResult()
 
-      if(currentResult === BattleResult.DRAW){
+      if (currentResult === BattleResult.DRAW) {
         // preserve existing streak but lose HP
       } else if (currentResult !== lastPlayerResult) {
         player.streak = 0

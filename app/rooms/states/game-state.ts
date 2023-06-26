@@ -23,9 +23,10 @@ export default class GameState extends Schema {
   @type("uint8") roundTime = StageDuration[1]
   @type("uint8") phase = GamePhaseState.PICK
   @type({ map: Player }) players = new MapSchema<Player>()
-  @type({ map: PokemonAvatarModel }) avatars = new MapSchema<PokemonAvatarModel>()
-  @type({ map: PokemonAvatar }) slingShotAvatars =
-    new MapSchema<PokemonAvatar>()
+  @type({ map: PokemonAvatarModel }) avatars =
+    new MapSchema<PokemonAvatarModel>()
+  @type({ map: PokemonAvatarModel }) slingShotAvatars =
+    new MapSchema<PokemonAvatarModel>()
   @type({ map: FloatingItem }) floatingItems = new MapSchema<FloatingItem>()
   @type({ map: SlingshotBox }) slingShotBoxes = new MapSchema<SlingshotBox>()
   @type(["string"]) additionalPokemons = new ArraySchema<Pkm>()

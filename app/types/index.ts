@@ -38,8 +38,8 @@ import { Weather } from "./enum/Weather"
 
 export * from "./enum/Emotion"
 
-export const WORLD_WIDTH = 1900
-export const WORLD_HEIGHT = 850
+export const WORLD_WIDTH = 1600
+export const WORLD_HEIGHT = 750
 
 export const FIGHTING_PHASE_DURATION = 40000
 
