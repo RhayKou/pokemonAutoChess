@@ -274,5 +274,14 @@
   "pkm.DUOSION": "Méïos",
   "pkm.REUNICLUS": "Symbios",
   "pkm.MEGA_RAYQUAZA": "Méga Rayquaza",
-  "pkm.SWABLU": "Tylton"
+  "pkm.SWABLU": "Tylton",
+  "ability.SOFT_BOILED": "E-Coque",
+  "ability.EARTHQUAKE": "Séisme",
+  "ability.KING_SHIELD": "Bouclier Royal",
+  "ability.EXPLOSION": "Explosion",
+  "ability.NIGHTMARE": "Cauchemar",
+  "ability.BONEMERANG": "Osmerang",
+  "ability.CLANGOROUS_SOUL": "Dracacophonie",
+  "ability.GROWL": "Rugissement",
+  "ability.RELIC_SONG": "Chant Antique"
 }
