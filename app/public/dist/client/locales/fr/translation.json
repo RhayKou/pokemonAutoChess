@@ -283,5 +283,17 @@
   "ability.BONEMERANG": "Osmerang",
   "ability.CLANGOROUS_SOUL": "Dracacophonie",
   "ability.GROWL": "Rugissement",
-  "ability.RELIC_SONG": "Chant Antique"
+  "ability.RELIC_SONG": "Chant Antique",
+  "ability.DISARMING_VOICE": "Voix Enjôleuse",
+  "ability.HIGH_JUMP_KICK": "Pied Voltige",
+  "ability.GRASS_WHISTLE": "Siffl'Herbe",
+  "ability.TRI_ATTACK": "Triplattaque",
+  "ability.ECHO": "Écho",
+  "ability.PETAL_DANCE": "Danse Fleurs",
+  "ability.HYPER_VOICE": "Mégaphone",
+  "ability.VOLT_SWITCH": "Change-Éclair",
+  "ability.LIQUIDATION": "Aqua-Brèche",
+  "ability.FIRE_BLAST": "Déflagration",
+  "ability.WHEEL_OF_FIRE": "Roue de Feu",
+  "ability.SEISMIC_TOSS": "Frappe Atlas"
 }
